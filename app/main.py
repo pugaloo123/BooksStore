@@ -1,5 +1,6 @@
-from fastapi import FastAPI
-from .database import engine, Base
+from fastapi import FastAPI, HTTPException
+from sqlalchemy import text
+from .database import engine, Base, SessionLocal
 from .routers import books
 
 Base.metadata.create_all(bind=engine)
@@ -17,3 +18,14 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/ready")
+def ready():
+    try:
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+    except Exception:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    return {"status": "ready"}
