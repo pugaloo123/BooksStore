@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
+from prometheus_fastapi_instrumentator import Instrumentator
 from .database import engine, Base, SessionLocal
 from .routers import books
 
@@ -8,6 +9,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="BookShelf API")
 
 app.include_router(books.router)
+
+Instrumentator().instrument(app).expose(app)
 
 
 @app.get("/")
